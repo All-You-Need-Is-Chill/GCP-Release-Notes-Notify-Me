@@ -28,7 +28,7 @@ def summarize_release_notes(request: Request, cloudevent):
         # 最新のエントリを取得
         latest_entry = feed.entries[0]
 
-        if not(is_today(latest_entry.updated)):
+        if not(is_in_24hours(latest_entry.updated)):
             print("本日の Google Cloud リリースノートはありません")
             send_email("本日の Google Cloud リリースノートはありません", "<a href='https://puzzlega.me/sakuin-tango/'>索引たんご</a>")
             return "本日のリリースノートはありません"
@@ -104,17 +104,22 @@ def send_email(email_subject, html_email_body):
     except Exception as e:
         print(f"error: {e}\n")
 
-def is_today(date_string):
+def is_in_24hours(date_string):
     # 与えられた文字列をdatetimeオブジェクトに変換
     date_obj = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
-    # 米国のタイムゾーン (UTC-07:00) を定義
-    us_tz = timezone(timedelta(hours=-7))
-    # 米国時間に変換
-    date_in_us = date_obj.astimezone(us_tz)
-    # 今日の米国時間の日付を取得
-    today_in_us = datetime.now(us_tz).date()
+    # 日本のタイムゾーン (UTC+09:00) を定義
+    jp_tz = timezone(timedelta(hours=+9))
+    # 日本時間に変換
+    date_in_jp = date_obj.astimezone(jp_tz)
+    # 今日と24時間前の日本時間の日時を取得
+    now_in_jp = datetime.now(jp_tz)
+    yesterday_in_jp = now_in_jp - timedelta(hours=1)
 
-    print(f"today_in_us:{today_in_us}")
-    print(f"date_in_us.date():{date_in_us.date()}")
-    # 日付部分だけを比較して今日かどうかを判断
-    return date_in_us.date() == today_in_us
+    print(f"date_in_jp:{date_in_jp}")
+    print(f"now_in_jp:{now_in_jp}")
+    print(f"yesterday_in_jp:{yesterday_in_jp}")
+
+    if date_in_jp < now_in_jp and date_in_jp > yesterday_in_jp:
+        return True
+    else:
+        return False
