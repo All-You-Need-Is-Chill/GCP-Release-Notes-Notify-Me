@@ -113,7 +113,7 @@ def is_in_24hours(date_string):
     date_in_jp = date_obj.astimezone(jp_tz)
     # 今日と24時間前の日本時間の日時を取得
     now_in_jp = datetime.now(jp_tz)
-    yesterday_in_jp = now_in_jp - timedelta(hours=1)
+    yesterday_in_jp = now_in_jp - timedelta(hours=24)
 
     print(f"date_in_jp:{date_in_jp}")
     print(f"now_in_jp:{now_in_jp}")
